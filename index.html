@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>池袋駅 案内マップ</title>
+    <style>
+        /* 基本設定 */
+        body { margin: 0; padding: 0; font-family: sans-serif; background-color: #f0f0f0; }
+        h1 { text-align: center; padding: 10px; font-size: 1.2rem; }
+
+        /* マップの親要素（ここが基準になります） */
+        .map-container {
+            position: relative; /* ピンを絶対配置するための基準 */
+            width: 100%;
+            max-width: 800px; /* PCで見やすくするための最大幅 */
+            margin: 0 auto;
+        }
+
+        /* 地図画像 */
+        .map-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* ピン（ボタン）のデザイン */
+        .pin {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background-color: red; /* 目立つ色 */
+            border: 2px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transform: translate(-50%, -50%); /* 中心を座標に合わせる */
+            animation: pulse 2s infinite; /* プルプル動くアニメーション */
+        }
+        
+        .pin.link-type {
+            background-color: #007bff; /* 鮮やかな青色 */
+            /* もしアニメーションの色も変えたい場合は以下も追加 */
+            /* animation: pulse-blue 2s infinite; */
+        }
+
+        /* (オプション) 青色用のアニメーション定義 */
+        
+        @keyframes pulse-blue {
+            0% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7); }
+            70% { transform: translate(-50%, -50%) scale(1.2); box-shadow: 0 0 0 10px rgba(0, 123, 255, 0); }
+            100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
+        }
+        /* ピンのアニメーション */
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+            70% { transform: translate(-50%, -50%) scale(1.2); box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+            100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+        }
+
+        /* ピンの位置設定 (top: 上からの%, left: 左からの%) */
+        /* 例：tobu hope center*/
+        .pin-3 { top: 13%; left: 51%; } 
+        /* 例：hukutoshin to JR */
+        .pin-4 { top: 54%; left: 68%; } 
+        /* 例：JR to seibu */
+        .pin-5 { top: 73.8%; left: 80.2%; } 
+        /* 例：seibu to yuurakutyou */
+        .pin-6 { top: 57%; left: 56.7%; } 
+        /* LUMINE*/
+        .pin-7 { top: 79%;  left: 53.5%;}
+        /* TOBU*/
+        .pin-8 { top: 81%;  left: 61.7%;}
+         /* SEIBU*/
+        .pin-9 { top: 46%;  left: 82%;}
+        /* PARCO*/
+        .pin-10 { top: 6%;  left: 82%;}
+        /* ISP*/
+        .pin-11 { top: 6%;  left:90%;}
+        /* ISP*/
+        .pin-12 { top: 26%; left: 27.5%;}
+        
+        /* 動画モーダル（ポップアップ） */
+        .modal {
+            display: none; /* 最初は隠す */
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .video-wrapper {
+            width: 90%;
+            max-width: 600px;
+            aspect-ratio: 16 / 9;
+            background: black;
+        }
+        
+        iframe, video {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .close-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Tap the map pin to start navigation<h1>
+
+    <div class="map-container">
+        <img src="map.jpg" alt="池袋駅マップ" class="map-image">
+        <div class="pin pin-3 link-type" data-type="link" data-src="https://tobuhopecenter.jp/" title="THC公式サイト"></div>
+
+        <div class="pin pin-4" data-type="youtube" data-src="rh_8AAUAJ5Y" title="JR to hukutoshin"></div>
+
+        <div class="pin pin-5" data-type="youtube" data-src="xM5CzTbHigk" title="JR to seibu"></div>
+
+        <div class="pin pin-6" data-type="youtube" data-src="_cGNUvCQx0A" title="seibu to yuurakutyo"></div>
+
+        <div class="pin pin-7 link-type" data-type="link" data-src="https://www.lumine.ne.jp/ikebukuro/" title="LUMINE"></div>
+
+        <div class="pin pin-8 link-type" data-type="link" data-src="https://www.tobu-dept.jp/ikebukuro/" title="TOBU"></div>
+
+        <div class="pin pin-9 link-type" data-type="link" data-src="https://www.sogo-seibu.jp/ikebukuro" title="SEIBU"></div>
+
+        <div class="pin pin-10 link-type" data-type="link" data-src="https://ikebukuro.parco.jp/" title="PARCO"></div>
+
+        <div class="pin pin-11 link-type" data-type="link" data-src="https://www.web-isp.co.jp/" title="ISP"></div>
+
+        <div class="pin pin-12 link-type" data-type="link" data-src="https://www.metropro-sc.jp/echika-ikebukuro/" title="Echika"></div>
+    </div>
+
+    <div class="modal" id="videoModal">
+        <div class="video-wrapper" id="videoContainer">
+            </div>
+        <button class="close-btn" onclick="closeModal()">閉じる</button>
+    </div>
+
+    <script>
+        const modal = document.getElementById('videoModal');
+        const videoContainer = document.getElementById('videoContainer');
+
+        // ピンをクリックしたときの処理
+        document.querySelectorAll('.pin').forEach(pin => {
+            pin.addEventListener('click', () => {
+                const type = pin.getAttribute('data-type');
+                const src = pin.getAttribute('data-src');
+
+                // ★ここから追加機能★
+                // タイプが「link」なら、新しいタブでサイトを開く
+                if (type === 'link') {
+                    window.open(src, '_blank'); 
+                    return; // ここで処理終了（動画画面は出さない）
+                }
+                // ★ここまで追加機能★
+                let htmlContent = '';
+
+                if (type === 'youtube') {
+                    // YouTubeの場合
+                    htmlContent = `<iframe src="https://www.youtube.com/embed/${src}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                } else {
+                    // ローカルファイルの場合
+                    htmlContent = `<video src="${src}" controls autoplay playsinline></video>`;
+                }
+
+                videoContainer.innerHTML = htmlContent;
+                modal.style.display = 'flex';
+            });
+        });
+
+        // モーダルを閉じる処理
+        function closeModal() {
+            modal.style.display = 'none';
+            videoContainer.innerHTML = ''; // 動画を完全に停止・削除
+        }
+
+        // 背景クリックでも閉じる
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+    </script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
